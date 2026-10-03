@@ -28,27 +28,64 @@ small{color:var(--mut)}
 
 .strength-row{display:flex;align-items:center;gap:10px}.strength-row input[type="range"]{flex:1;min-width:0}.strength-row input[type="number"]{width:82px;flex:0 0 82px;padding:8px;border:1px solid #303640;border-radius:8px;background:#0f1115;color:#f8fafc;font:inherit}.group>label{display:block;margin-bottom:6px}
 #hatDrop{border:2px dashed var(--bd);border-radius:12px;padding:16px 10px;text-align:center;cursor:pointer;color:var(--mut)}#hatDrop.on{border-color:var(--ac);color:var(--ac)}.hatrow{display:grid;grid-template-columns:96px 1fr;align-items:center;gap:8px;color:var(--mut)}.hatrow input{min-width:0}.hatrow input[type=number]{padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font:inherit}.hatrow b{font-weight:400;color:var(--fg)}
+
+
+/* Sidebar organization and upload states */
+#side{gap:12px;padding:16px;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain; scrollbar-gutter:stable; min-height:0;}
+/* Keep accordion cards at their natural height; let the sidebar/page scroll instead. */
+#side > *, .section, .subsection { flex-shrink:0; }
+.sidehead{padding:2px 0 4px}.sidehead .hint{margin:4px 0 0}
+.section,.subsection{border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--panel)}
+.section>summary,.subsection>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;cursor:pointer;user-select:none}
+.section>summary::-webkit-details-marker,.subsection>summary::-webkit-details-marker{display:none}
+.section>summary:before,.subsection>summary:before{content:"";width:7px;height:7px;border-right:2px solid var(--mut);border-bottom:2px solid var(--mut);transform:rotate(-45deg);transition:transform .15s;order:3;flex:none}
+.section[open]>summary:before,.subsection[open]>summary:before{transform:rotate(45deg)}
+.sumtitle{font-weight:650;color:var(--fg)}.sumhint{margin-left:auto;color:var(--mut);font-size:11px}
+.sectionbody{display:flex;flex-direction:column;gap:12px;padding:0 12px 12px}
+.section[open]>summary{border-bottom:1px solid var(--bd);margin-bottom:12px}
+.subsection{background:var(--bg)}.subsection>summary{font-size:13px;font-weight:600}.subsection .sectionbody{padding-top:0}
+.uploadzone{display:flex;flex-direction:column;align-items:center;gap:5px;padding:18px 10px;border:1.5px dashed var(--bd);border-radius:12px;text-align:center;cursor:pointer;color:var(--mut);transition:border-color .15s,background .15s;min-height:88px;justify-content:center}
+.uploadzone strong{font-size:13px;color:var(--fg);font-weight:650}.uploadzone small{font-size:11px}.uploadzone .uploadicon{display:grid;place-items:center;width:28px;height:28px;border-radius:8px;background:color-mix(in srgb,var(--ac) 12%,transparent);color:var(--ac);font-size:20px;line-height:1}
+.uploadzone:hover,.uploadzone:focus-visible,.uploadzone.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 6%,transparent);outline:none}
+.filemeta{font-size:11px;color:var(--mut);overflow-wrap:anywhere;min-height:15px}
+.footerhint{font-size:11px;line-height:1.5;color:var(--mut);padding:2px 2px 8px}
+button.b{transition:background .12s,border-color .12s}button.b:hover:not(:disabled){border-color:var(--ac);background:color-mix(in srgb,var(--ac) 7%,transparent)}button.b:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:700px){
+  html,body{height:auto;min-height:100%;overflow-x:hidden;overflow-y:auto}
+  #app{height:auto;min-height:100vh;overflow:visible}
+  #side{padding:12px;gap:10px;overflow:visible;min-height:auto}
+  #side > *, .section, .subsection{flex-shrink:0}
+  .section>summary{padding:14px}.uploadzone{min-height:92px}.sectionbody{gap:14px}.footerhint{padding-bottom:16px}
+}
 </style></head><body>
 <div id="app"><div id="view"><div id="msg">Loading model…</div></div>
-<div id="side"><h1>Phone Skin + Charm Viewer</h1>
-<div id="drop">Drop a PNG here or tap to upload<input id="f" type="file" accept="image/png,image/*" hidden></div>
-<img id="prev" alt="">
+<div id="side"><div class="sidehead"><h1>Phone Skin + Charm Viewer</h1></div>
+<details class="section" open><summary><span class="sumtitle">Textures</span><span class="sumhint">Upload & apply</span></summary><div class="sectionbody">
+<div id="drop" class="uploadzone" role="button" tabindex="0" aria-label="Upload phone texture"><span class="uploadicon">↑</span><strong>Drop an image here</strong><span>or <u>browse files</u></span><small>PNG, JPG, WebP · image texture</small><input id="f" type="file" accept="image/png,image/jpeg,image/webp,image/*" hidden></div>
+<div id="textureMeta" class="filemeta" aria-live="polite">No custom texture loaded</div><img id="prev" alt="Preview of the selected texture">
 <div><small>Apply texture to</small><div class="seg" id="tgt"><button class="a" data-i="0">Skin</button><button data-i="1">Screen</button><button data-i="2">Emission Map</button></div></div>
-<label>Auto-rotate <input type="checkbox" id="rot"></label>
-<label>Outline <input type="checkbox" id="out"></label>
-<label>Background <input type="color" id="bg"></label>
-<div class="group"><small>Camera view</small><div class="btnrow" id="views"><button class="b" data-view="front">Front</button><button class="b" data-view="back">Back</button><button class="b" data-view="left">Left</button><button class="b" data-view="right">Right</button><button class="b" data-view="top">Top</button></div><button class="b" id="cameraReset">Reset camera</button></div>
+<div class="btnrow"><button class="b" id="undo" disabled>Undo</button><button class="b" id="redo" disabled>Redo</button></div>
+<div class="btnrow"><button class="b" id="resetSkin">Reset skin</button><button class="b" id="resetScreen">Reset screen</button><button class="b" id="resetEmission">Reset emission map</button></div>
+<button class="b" id="dl">Download skin template</button><button class="b" id="rs">Reset all phone textures</button>
+</div></details>
+<details class="section"><summary><span class="sumtitle">Appearance</span><span class="sumhint">Material & Lighting</span></summary><div class="sectionbody">
 <div class="group"><small>Material finish</small><div class="btnrow" id="finishes"><button class="b" data-finish="matte">Matte</button><button class="b" data-finish="satin">Satin</button><button class="b" data-finish="glossy">Glossy</button><button class="b" data-finish="metallic">Metallic</button></div></div>
 <div class="group"><label for="gl">Shininess</label><div class="strength-row"><input type="range" id="gl" min="0" max="1" step="0.01" value="0.55"><input type="number" id="glNumber" min="0" max="1" step="0.01" value="0.55" aria-label="Shininess numeric value"></div></div>
 <div class="group"><label for="emPower">Emission strength</label><div class="strength-row"><input type="range" id="emPower" min="0" max="5" step="0.05" value="1"><input type="number" id="emPowerNumber" min="0" max="5" step="0.05" value="1" aria-label="Emission strength numeric value"></div></div>
-<div class="btnrow"><button class="b" id="undo" disabled>Undo texture</button><button class="b" id="redo" disabled>Redo texture</button></div>
-<div class="btnrow"><button class="b" id="resetSkin">Reset skin</button><button class="b" id="resetScreen">Reset screen</button><button class="b" id="resetEmission">Reset emission map</button></div>
-<button class="b" id="dl">Download original texture (Skin Template)</button>
-<button class="b" id="rs">Reset all phone textures</button>
-<div class="group" id="hatBox"><small>Charm / hatbundle (Unity asset bundle)</small>
-<div id="hatDrop">Drop or tap to upload a hatbundle (replaces current)<input id="hatF" type="file" hidden></div><div class="hint" id="hatMsg"></div>
+</div></details>
+<details class="section"><summary><span class="sumtitle">Camera & scene</span><span class="sumhint">View options</span></summary><div class="sectionbody">
+<label>Auto-rotate <input type="checkbox" id="rot"></label><label>Outline <input type="checkbox" id="out"></label><label>Background <input type="color" id="bg"></label>
+<div class="group"><small>Camera view</small><div class="btnrow" id="views"><button class="b" data-view="front">Front</button><button class="b" data-view="back">Back</button><button class="b" data-view="left">Left</button><button class="b" data-view="right">Right</button><button class="b" data-view="top">Top</button></div><button class="b" id="cameraReset">Reset camera</button></div>
+</div></details>
+<details class="section" id="hatBox"><summary><span class="sumtitle">Charm</span><span class="sumhint">Position & Physics</span></summary><div class="sectionbody">
+<div id="hatDrop" class="uploadzone" role="button" tabindex="0" aria-label="Upload charm bundle"><span class="uploadicon">＋</span><strong>Drop a charm bundle</strong><span>or <u>browse files</u></span><small>Unity asset bundle / .hatbundle</small><input id="hatF" type="file" hidden></div><div class="filemeta hint" id="hatMsg" aria-live="polite">No charm loaded yet</div>
 <div id="hatCtl" style="display:none;flex-direction:column;gap:8px">
-<label>Show charm <input type="checkbox" id="hatShow" checked></label> <label>Flip charm <input type="checkbox" id="hatFlip"></label>
+<label>Show charm <input type="checkbox" id="hatShow" checked></label><label>Flip charm <input type="checkbox" id="hatFlip"></label>
+<details class="subsection"><summary>Physics & interaction</summary><div class="sectionbody">
+<label>Charm physics (cloth) <input type="checkbox" id="phys"></label><label>Drag to test <input type="checkbox" id="physDrag" disabled></label>
+<div id="physOpts" style="display:none;flex-direction:column;gap:8px"><div class="hatrow"><span>Gravity</span><input type="number" id="physG" value="40" step="5" min="0" aria-label="Gravity"></div><div class="hatrow"><span>Damping</span><input type="number" id="physD" value="20" step="1" min="0" aria-label="Damping"></div><div class="btnrow"><button class="b" id="physReset">Reset physics</button></div></div>
+<div class="hint" id="physHint">Enable physics and “Drag to test” to interact with the charm. Drag empty space to orbit.</div>
+</div></details>
 <div class="hatrow"><span>Scale</span><input type="number" id="hs" value="1" step="0.1" aria-label="Charm scale"></div>
 <div class="hatrow"><span>Left/right</span><input type="range" id="hx" min="-0.5" max="0.5" step="0.005" value="0"></div>
 <div class="hatrow"><span>Up/down</span><input type="range" id="hy" min="-0.5" max="0.5" step="0.005" value="0"></div>
@@ -56,10 +93,11 @@ small{color:var(--mut)}
 <div class="hatrow"><span>Rotate X <b id="rxv">0°</b></span><input type="range" id="rx" min="-180" max="180" step="1" value="0"></div>
 <div class="hatrow"><span>Rotate Y <b id="ryv">0°</b></span><input type="range" id="ry" min="-180" max="180" step="1" value="0"></div>
 <div class="hatrow"><span>Rotate Z <b id="rzv">0°</b></span><input type="range" id="rz" min="-180" max="180" step="1" value="0"></div>
-<div class="btnrow"><button class="b" id="hatReset">Reset charm position</button></div></div>
-<button class="b" id="hatRemove" disabled>Remove charm</button></div>
-<small>Drag to orbit, scroll or pinch to zoom, right-drag to pan. Textures use the model's own UV layout, so paint over the downloaded template.</small>
-</div></div>
+<div class="btnrow"><button class="b" id="hatReset">Reset charm position</button><button class="b" id="hatRemove" disabled>Remove charm</button></div>
+
+</div></div></details>
+<div class="footerhint">Drag to orbit · Scroll or pinch to zoom · Right-drag to pan. Textures follow the model’s UV layout; use the downloaded template to paint accurately.</div>
+</div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -262,6 +300,7 @@ new THREE.GLTFLoader().parse(bin.buffer,'',g=>{
 let tgt=0;
 document.querySelectorAll('#tgt button').forEach(b=>b.onclick=()=>{tgt=+b.dataset.i;document.querySelectorAll('#tgt button').forEach(x=>x.classList.toggle('a',x===b));updateHistoryButtons();updatePreview(getTargetMap(tgt));});
 const texturePreviewUrls=new Map();
+const textureFileInfo=new Map();
 const previewUrls=new Set();
 function cleanupUnusedTextures(){
   const used=new Set();
@@ -274,7 +313,7 @@ function cleanupUnusedTextures(){
   for(const [texture,url] of texturePreviewUrls){
     if(!used.has(texture)){
       URL.revokeObjectURL(url);previewUrls.delete(url);
-      texturePreviewUrls.delete(texture);texture.dispose();
+      texturePreviewUrls.delete(texture);textureFileInfo.delete(texture);texture.dispose();
     }
   }
 }
@@ -287,11 +326,11 @@ function getTargetMap(index){const m=targetMaterial(index);return m?(index===2?(
 function setTargetMap(index,texture){const m=targetMaterial(index);if(!m)return;if(index===2){m.emissiveMap=texture||null;if(texture){m.emissive.set(0xffffff);m.emissiveIntensity=Number($('emPower').value);}else{m.emissive.copy(m.userData.__originalEmissiveColor||new THREE.Color(0x000000));m.emissiveIntensity=m.userData.__originalEmissiveIntensity??1;} }else{m.map=texture||null;}m.needsUpdate=true;}
 function recordTextureChange(index){const h=textureHistory[index];h.undo.push(getTargetMap(index));if(h.undo.length>30)h.undo.shift();h.redo.length=0;updateHistoryButtons();cleanupUnusedTextures();}
 function updateHistoryButtons(){const h=textureHistory[tgt];$('undo').disabled=!h||h.undo.length===0;$('redo').disabled=!h||h.redo.length===0;}
-function updatePreview(texture){const p=$('prev');const saved=texture&&texturePreviewUrls.get(texture);if(saved){p.src=saved;p.style.display='block';}else{p.removeAttribute('src');p.style.display='none';}}
+function updatePreview(texture){const p=$('prev'),meta=$('textureMeta');const saved=texture&&texturePreviewUrls.get(texture);if(saved){p.src=saved;p.style.display='block';const info=textureFileInfo.get(texture);const image=texture.image;const dims=image&&image.width&&image.height?` · ${image.width} × ${image.height}`:'';meta.textContent=info?`${info.name}${dims}`:'Custom texture loaded'+dims;}else{p.removeAttribute('src');p.style.display='none';meta.textContent='No custom texture loaded';}}
 function apply(file){
   if(!file||!targetMaterial(tgt))return;
   const targetIndex=tgt;
-  if(!file.type||!file.type.startsWith('image/')){ $('msg').textContent='Please choose an image file';return; }
+  if(!file.type||!file.type.startsWith('image/')){ $('msg').textContent='Please choose an image file (PNG, JPG, or WebP)';return; }
   const url=URL.createObjectURL(file);
   new THREE.TextureLoader().load(url,t=>{
     URL.revokeObjectURL(url);
@@ -299,7 +338,7 @@ function apply(file){
     t.flipY=false;t.encoding=THREE.sRGBEncoding;t.anisotropy=ren.capabilities.getMaxAnisotropy();
     if(previous){t.wrapS=previous.wrapS;t.wrapT=previous.wrapT}
     setTargetMap(targetIndex,t);
-    const imageUrl=URL.createObjectURL(file);previewUrls.add(imageUrl);texturePreviewUrls.set(t,imageUrl);
+    const imageUrl=URL.createObjectURL(file);previewUrls.add(imageUrl);texturePreviewUrls.set(t,imageUrl);textureFileInfo.set(t,{name:file.name||'Custom texture'});
     if(tgt===targetIndex)updatePreview(t);
     updateHistoryButtons();$('msg').textContent='';
   },undefined,()=>{URL.revokeObjectURL(url);$('msg').textContent='Could not load that image. Try a PNG or JPG.';});
@@ -376,9 +415,9 @@ function placeHat(){
     .add(rotatedFlipOffset)
     .add(new THREE.Vector3(Number($('hx').value),Number($('hy').value),Number($('hz').value)));
 }
-function removeHat(){if(!hat.g)return;hat.g.parent&&hat.g.parent.remove(hat.g);hat.g.traverse(o=>{if(o.isMesh){o.geometry.dispose();if(o.material.map)o.material.map.dispose();o.material.dispose()}});hat.g=null;$('hatCtl').style.display='none';$('hatRemove').disabled=true}
+function removeHat(){if(!hat.g)return;if(window.__physOnRemove)window.__physOnRemove();hat.g.parent&&hat.g.parent.remove(hat.g);hat.g.traverse(o=>{if(o.isMesh){o.geometry.dispose();if(o.material.map)o.material.map.dispose();o.material.dispose()}});hat.g=null;$('hatCtl').style.display='none';$('hatRemove').disabled=true}
 async function loadHat(file){
-  if(!file)return;const hm=$('hatMsg');hm.textContent='Reading '+file.name+'…';
+  if(!file)return;const hm=$('hatMsg');hm.textContent='Loading '+file.name+'…';
   try{
     await new Promise(r=>setTimeout(r,30));
     const parts=extractHat(await file.arrayBuffer());
@@ -389,16 +428,233 @@ async function loadHat(file){
     hat.auto=1;if(!isFinite(ratio)||ratio<0.3||ratio>1){hat.auto=+(0.66*pl/b.len).toPrecision(3);fixed.push('size')}
     if(b.ax!==2||b.q.angleTo(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),Math.PI))>0.01)fixed.push('orientation');
     $('hatShow').checked=true;$('hatFlip').checked=false;['hx','hy','hz','rx','ry','rz'].forEach(i=>$(i).value=0);$('hs').value=hat.auto;
-    placeHat();$('hatCtl').style.display='flex';$('hatRemove').disabled=false;
-    const t=parts[0].tex;hm.textContent='Loaded '+parts.length+' mesh'+(parts.length>1?'es':'')+(t?(t.error?' (texture: '+t.error+')':' with texture'):' (no texture found)')+(fixed.length?'. Auto-corrected '+fixed.join(' and ')+'.':'');
+    placeHat();$('hatCtl').style.display='flex';$('hatRemove').disabled=false;if(window.__physOnLoad)window.__physOnLoad();
+    const t=parts[0].tex;hm.textContent='Loaded '+file.name+' · '+parts.length+' mesh'+(parts.length>1?'es':'')+(t?(t.error?' (texture: '+t.error+')':' with texture'):' (no texture found)')+(fixed.length?'. Auto-corrected '+fixed.join(' and ')+'.':'');
   }catch(e){hm.textContent='Could not read hatbundle: '+e.message}
 }
-const hd=$('hatDrop');hd.onclick=()=>$('hatF').click();$('hatF').onchange=e=>{loadHat(e.target.files[0]);e.target.value=''};
+const hd=$('hatDrop');hd.onclick=()=>$('hatF').click();
+hd.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('hatF').click();}};
+$('hatF').onchange=e=>{loadHat(e.target.files[0]);e.target.value=''};
 hd.addEventListener('dragover',e=>{e.preventDefault();hd.classList.add('on')});hd.addEventListener('dragleave',()=>hd.classList.remove('on'));
 hd.addEventListener('drop',e=>{e.preventDefault();hd.classList.remove('on');loadHat(e.dataTransfer.files[0])});
 $('hatShow').onchange=e=>{if(hat.g)hat.g.visible=e.target.checked};
 ['hx','hy','hz','hs','rx','ry','rz'].forEach(i=>$(i).addEventListener('input',placeHat));$('hatFlip').addEventListener('change',placeHat);
 $('hatReset').onclick=()=>{['hx','hy','hz','rx','ry','rz'].forEach(i=>$(i).value=0);$('hs').value=hat.auto||1;$('hatFlip').checked=false;placeHat()};
 $('hatRemove').onclick=()=>{removeHat();$('hatMsg').textContent='Charm removed'};
-(function loop(){requestAnimationFrame(loop);ctl.update();ren.render(scene,cam)})();
+(function loop(){requestAnimationFrame(loop);ctl.update();if(window.__physFrame)window.__physFrame();ren.render(scene,cam)})();
+</script>
+<script>
+// ===== Charm cloth physics (position-based dynamics, MagicaCloth-style) =====
+(function(){
+'use strict';
+const V3=THREE.Vector3,Q=THREE.Quaternion,M4=THREE.Matrix4,M3=THREE.Matrix3;
+const P=window.__phys={on:false,drag:false,sim:null,grab:null,ph:null};
+const H=1/240,ITER=6,MAXSUB=8;
+let acc=0,last=0;
+const gIn=$('physG'),dIn=$('physD'),hint=$('physHint');
+const getG=()=>Math.max(0,Number(gIn.value)||0),getD=()=>Math.max(0,Number(dIn.value)||0);
+
+/* ---------- rotation extraction (Mueller et al. 2016) ---------- */
+const _R=new M4(),_dq=new Q(),_ax=new V3();
+function extractRot(a0,a1,a2,q){
+  for(let it=0;it<12;it++){
+    _R.makeRotationFromQuaternion(q);const e=_R.elements;
+    const ox=e[1]*a0.z-e[2]*a0.y+e[5]*a1.z-e[6]*a1.y+e[9]*a2.z-e[10]*a2.y,
+          oy=e[2]*a0.x-e[0]*a0.z+e[6]*a1.x-e[4]*a1.z+e[10]*a2.x-e[8]*a2.z,
+          oz=e[0]*a0.y-e[1]*a0.x+e[4]*a1.y-e[5]*a1.x+e[8]*a2.y-e[9]*a2.x;
+    const d=Math.abs(e[0]*a0.x+e[1]*a0.y+e[2]*a0.z+e[4]*a1.x+e[5]*a1.y+e[6]*a1.z+e[8]*a2.x+e[9]*a2.y+e[10]*a2.z)+1e-9;
+    const l=Math.sqrt(ox*ox+oy*oy+oz*oz),w=l/d;if(w<1e-9)break;
+    _ax.set(ox/l,oy/l,oz/l);_dq.setFromAxisAngle(_ax,w);q.premultiply(_dq).normalize();
+  }
+}
+
+/* ---------- build particle system from the charm mesh ---------- */
+function cluster(ids,n,pos){
+  n=Math.min(n,ids.length);const pts=ids.map(i=>new V3(pos[3*i],pos[3*i+1],pos[3*i+2]));
+  const cen=pts.reduce((s,p)=>s.add(p),new V3()).multiplyScalar(1/pts.length);
+  let first=0,bd=-1;pts.forEach((p,k)=>{const d=p.distanceToSquared(cen);if(d>bd){bd=d;first=k}});
+  const sel=[first],dm=pts.map(p=>p.distanceToSquared(pts[first]));
+  while(sel.length<n){let b=0,bv=-1;dm.forEach((d,k)=>{if(d>bv){bv=d;b=k}});sel.push(b);pts.forEach((p,k)=>{const d=p.distanceToSquared(pts[b]);if(d<dm[k])dm[k]=d})}
+  let C=sel.map(k=>pts[k].clone());const as=new Int32Array(pts.length);
+  const assign=()=>pts.forEach((p,k)=>{let b=0,bv=1e30;C.forEach((c,j)=>{const d=p.distanceToSquared(c);if(d<bv){bv=d;b=j}});as[k]=b});
+  for(let it=0;it<4;it++){assign();const S=C.map(()=>new V3()),cnt=C.map(()=>0);pts.forEach((p,k)=>{S[as[k]].add(p);cnt[as[k]]++});C=C.map((c,j)=>cnt[j]?S[j].multiplyScalar(1/cnt[j]):c)}
+  assign();return{C,as,pts};
+}
+function build(){
+  const bg=hat.g&&hat.g.children[0];if(!bg)return null;
+  const meshes=bg.children.filter(m=>m.isMesh);if(!meshes.length)return null;
+  let N=0;const off=[];meshes.forEach(m=>{off.push(N);N+=m.geometry.attributes.position.count});
+  const pos=new Float32Array(N*3),nor=new Float32Array(N*3),meshOf=new Int32Array(N);
+  meshes.forEach((m,gi)=>{const g=m.geometry,c=g.attributes.position.count;pos.set(g.attributes.position.array,off[gi]*3);if(g.attributes.normal)nor.set(g.attributes.normal.array,off[gi]*3);for(let i=0;i<c;i++)meshOf[off[gi]+i]=gi});
+  const tris=[];meshes.forEach((m,gi)=>{const ix=m.geometry.index;if(ix){const a=ix.array;for(let i=0;i<a.length;i++)tris.push(a[i]+off[gi])}});
+  const weld=new Int32Array(N),mp=new Map();
+  for(let i=0;i<N;i++){const k=Math.round(pos[3*i]*1e4)+','+Math.round(pos[3*i+1]*1e4)+','+Math.round(pos[3*i+2]*1e4);let w=mp.get(k);if(w===undefined){w=i;mp.set(k,i)}weld[i]=w}
+  const par=new Int32Array(N);for(let i=0;i<N;i++)par[i]=i;
+  const find=a=>{while(par[a]!==a){par[a]=par[par[a]];a=par[a]}return a};
+  for(let i=0;i<tris.length;i+=3){const a=find(weld[tris[i]]),b=find(weld[tris[i+1]]),c=find(weld[tris[i+2]]);par[b]=a;par[find(c)]=find(a)}
+  const U=[...mp.values()];let nearest=U[0],nd=1e30;
+  U.forEach(i=>{const d=pos[3*i]**2+pos[3*i+1]**2+pos[3*i+2]**2;if(d<nd){nd=d;nearest=i}});
+  const cc=find(nearest),strapIds=U.filter(i=>find(i)===cc),bodyIds=U.filter(i=>find(i)!==cc);
+  const nB=bodyIds.length?13:0,nS=bodyIds.length?28:40;
+  const r=[],type=[],m=[],rad=[],pOfWeld=new Map();
+  const addPool=(ids,n,tp)=>{if(!ids.length)return;const cl=cluster(ids,n,pos),base=r.length;
+    cl.C.forEach(c=>{r.push(c);type.push(tp);m.push(0);rad.push(0)});
+    ids.forEach((id,k)=>{const pi=base+cl.as[k];pOfWeld.set(id,pi);m[pi]++;rad[pi]+=cl.pts[k].distanceTo(r[pi])});
+    for(let k=base;k<r.length;k++){rad[k]/=Math.max(1,m[k]);m[k]=Math.max(1,m[k])}};
+  addPool(strapIds,nS,0);const strapN=r.length;addPool(bodyIds,nB,1);const n=r.length;
+  // edges between strap clusters sharing a triangle
+  const es=new Set(),edges=[];
+  for(let i=0;i<tris.length;i+=3){const w=[0,1,2].map(k=>weld[tris[i+k]]);if(find(w[0])!==cc)continue;const p=w.map(x=>pOfWeld.get(x));
+    for(const [a,b] of [[0,1],[1,2],[0,2]]){if(p[a]===p[b])continue;const lo=Math.min(p[a],p[b]),hi=Math.max(p[a],p[b]),k=lo*1000+hi;if(!es.has(k)){es.add(k);edges.push([lo,hi])}}}
+  const nbr=Array.from({length:n},()=>[]);edges.forEach(([a,b])=>{nbr[a].push(b);nbr[b].push(a)});
+  const bends=[],bk=new Set();
+  for(let i=0;i<n;i++)for(const a of nbr[i])for(const b of nbr[i]){if(a>=b)continue;const k=a*1000+b;if(es.has(k)||bk.has(k))continue;bk.add(k);bends.push([a,b])}
+  // links between strap ends and the rigid body
+  const body=[];for(let i=strapN;i<n;i++)body.push(i);
+  const links=[];
+  if(body.length){const cand=[];for(let s=0;s<strapN;s++){let bb=-1,bd=1e30;body.forEach(b=>{const d=r[s].distanceTo(r[b]);if(d<bd){bd=d;bb=b}});cand.push([bd,s,bb])}
+    cand.sort((a,b)=>a[0]-b[0]);cand.slice(0,3).forEach(c=>links.push([c[1],c[2]]))}
+  const pinned=new Uint8Array(n),geo=new Float64Array(n),src=new Int32Array(n),sgn=nbr.map(()=>[]),fb=new Int32Array(n);
+  // skinning weights: 3 nearest particles of the same kind
+  let avg=0;edges.forEach(([a,b])=>avg+=r[a].distanceTo(r[b]));avg=avg/Math.max(1,edges.length)||0.05;const eps=(0.15*avg)**2;
+  const sIdx=new Int32Array(N*3).fill(-1),sW=new Float32Array(N*3),sOff=new Float32Array(N*9);
+  for(let i=0;i<N;i++){const tp=find(weld[i])===cc?0:1,lo=tp?strapN:0,hi=tp?n:strapN,v=new V3(pos[3*i],pos[3*i+1],pos[3*i+2]);
+    const c=[];for(let k=lo;k<hi;k++)c.push([v.distanceToSquared(r[k]),k]);c.sort((a,b)=>a[0]-b[0]);
+    const use=c.slice(0,Math.min(3,c.length));let ws=0;use.forEach(u=>{u[2]=1/(u[0]+eps);ws+=u[2]});
+    use.forEach((u,j)=>{sIdx[3*i+j]=u[1];sW[3*i+j]=u[2]/ws;sOff[9*i+3*j]=v.x-r[u[1]].x;sOff[9*i+3*j+1]=v.y-r[u[1]].y;sOff[9*i+3*j+2]=v.z-r[u[1]].z})}
+  let Mb=0;body.forEach(i=>Mb+=m[i]);
+  let len=0;{const mn=new V3(1e9,1e9,1e9),mx=new V3(-1e9,-1e9,-1e9);r.forEach(p=>{mn.min(p);mx.max(p)});len=mx.distanceTo(mn)}
+  return{bg,meshes,N,off,meshOf,pos0:pos,nor0:nor,n,strapN,r,type,m,rad,edges,nbr,bends,sgn,fb,links,body,Mb,pinned,geo,src,sIdx,sW,sOff,len,
+    x:r.map(()=>new V3()),px:r.map(()=>new V3()),X0:r.map(()=>new V3()),q:r.map(()=>new Q()),qBody:new Q(),eL:new Float32Array(edges.length),bL:new Float32Array(bends.length),lL:new Float32Array(links.length),key:''};
+}
+
+/* ---------- simulation ---------- */
+const tmp=new V3(),tmp2=new V3(),rootInv=new M4();
+function restWorld(S){S.bg.updateMatrixWorld(true);const M=S.bg.matrixWorld;for(let i=0;i<S.n;i++)S.X0[i].copy(S.r[i]).applyMatrix4(M)}
+function configure(S){
+  restWorld(S);const pb=window.phoneBox,A=new V3(Number($('hx').value),(pb.min.y+pb.max.y)/2+Number($('hy').value),pb.max.z-0.03+Number($('hz').value)).applyMatrix4(window.phoneRoot.matrixWorld);
+  let near=0,nd=1e30;for(let i=0;i<S.n;i++){const d=S.X0[i].distanceToSquared(A);if(d<nd){nd=d;near=i}}
+  S.pinned.fill(0);
+  if(S.type[near]===1&&S.body.length)S.body.forEach(i=>S.pinned[i]=1);            // heavy end sits at the phone: the whole rigid end is anchored
+  else{const o=[];for(let i=0;i<S.strapN;i++)o.push(i);o.sort((a,b)=>S.X0[a].distanceToSquared(A)-S.X0[b].distanceToSquared(A));o.slice(0,Math.max(1,Math.min(5,Math.floor(S.strapN/3)))).forEach(i=>S.pinned[i]=1)}
+  S.geo.fill(Infinity);S.src.fill(-1);
+  let strapPinned=false;for(let i=0;i<S.strapN;i++)if(S.pinned[i]){S.geo[i]=0;S.src[i]=i;strapPinned=true}
+  if(!strapPinned)S.links.forEach(([s,b])=>{const d=S.r[s].distanceTo(S.r[b]);if(d<S.geo[s]){S.geo[s]=d;S.src[s]=b}});
+  const done=new Uint8Array(S.n);
+  for(;;){let u=-1,bv=Infinity;for(let i=0;i<S.strapN;i++)if(!done[i]&&S.geo[i]<bv){bv=S.geo[i];u=i}if(u<0)break;done[u]=1;
+    for(const v of S.nbr[u]){const d=S.geo[u]+S.r[u].distanceTo(S.r[v]);if(d<S.geo[v]){S.geo[v]=d;S.src[v]=S.src[u]}}}
+  for(let i=0;i<S.n;i++){const nb=S.nbr[i];S.sgn[i]=nb.map(j=>S.geo[j]>S.geo[i]+1e-9?1:S.geo[j]<S.geo[i]-1e-9?-1:0);let b=-1,bv=-1;nb.forEach((j,k)=>{const g=isFinite(S.geo[j])?S.geo[j]:0;if(g>bv){bv=g;b=k}});S.fb[i]=b}
+  hint.textContent=S.n+' cloth particles ('+S.pinned.reduce((a,b)=>a+b,0)+' pinned to the phone).';
+}
+function resetPos(S){configure(S);restWorld(S);for(let i=0;i<S.n;i++){S.x[i].copy(S.X0[i]);S.px[i].copy(S.X0[i]);S.q[i].identity()}S.qBody.identity();S.key=hat.g.scale.x+','+hat.g.scale.z}
+function phoneStep(h){const p=P.ph;if(!p||!window.phoneRoot)return;const pos=window.phoneRoot.position,k=p.dragging?900:70,c=p.dragging?54:8,t=p.dragging?p.target:p.home;
+  p.vel.x+=(k*(t.x-pos.x)-c*p.vel.x)*h;p.vel.y+=(k*(t.y-pos.y)-c*p.vel.y)*h;p.vel.z+=(k*(t.z-pos.z)-c*p.vel.z)*h;pos.addScaledVector(p.vel,h);
+  if(!p.dragging&&pos.distanceTo(p.home)<1e-4&&p.vel.lengthSq()<1e-6){pos.copy(p.home);p.vel.set(0,0,0)}}
+function dist(S,a,b,L,wa,wb,k=1){const A=S.x[a],B=S.x[b];tmp.subVectors(B,A);const l=tmp.length(),ws=wa+wb;if(l<1e-9||ws===0)return;const c=k*(l-L)/l/ws;A.addScaledVector(tmp,c*wa);B.addScaledVector(tmp,-c*wb)}
+function step(S,h){
+  phoneStep(h);window.phoneRoot.updateMatrixWorld(true);restWorld(S);
+  const key=hat.g.scale.x+','+hat.g.scale.z;if(key!==S.key)resetPos(S);
+  const sc=Math.abs(hat.g.scale.x),gy=-getG()*h*h,damp=Math.exp(-getD()*h),vmax=S.len*sc*25*h,n=S.n;
+  for(let i=0;i<n;i++){const x=S.x[i],px=S.px[i];
+    if(S.pinned[i]){x.copy(S.X0[i]);px.copy(x);continue}
+    tmp.subVectors(x,px).multiplyScalar(damp);const l=tmp.length();if(l>vmax)tmp.multiplyScalar(vmax/l);
+    px.copy(x);x.add(tmp);x.y+=gy}
+  for(let k=0;k<S.edges.length;k++)S.eL[k]=S.X0[S.edges[k][0]].distanceTo(S.X0[S.edges[k][1]]);
+  for(let k=0;k<S.bends.length;k++)S.bL[k]=S.X0[S.bends[k][0]].distanceTo(S.X0[S.bends[k][1]]);
+  for(let k=0;k<S.links.length;k++)S.lL[k]=S.X0[S.links[k][0]].distanceTo(S.X0[S.links[k][1]]);
+  const w=i=>S.pinned[i]?0:1/S.m[i],wB=1/S.Mb;rootInv.copy(window.phoneRoot.matrixWorld).invert();
+  const box=window.phoneBox,g=P.grab,C=new V3(),C0=new V3(),a0=new V3(),a1=new V3(),a2=new V3();
+  for(let it=0;it<ITER;it++){
+    for(let k=0;k<S.edges.length;k++){const e=S.edges[k];dist(S,e[0],e[1],S.eL[k],w(e[0]),w(e[1]))}
+    for(let k=0;k<S.bends.length;k++){const e=S.bends[k];dist(S,e[0],e[1],S.bL[k],w(e[0]),w(e[1]),0.35)}
+    for(let k=0;k<S.links.length;k++){const e=S.links[k];dist(S,e[0],e[1],S.lL[k],w(e[0]),S.pinned[e[1]]?0:wB)}
+    for(let i=0;i<S.strapN;i++){if(S.pinned[i]||S.src[i]<0)continue;const A=S.x[S.src[i]];tmp.subVectors(S.x[i],A);const l=tmp.length(),mx=S.geo[i]*sc;if(l>mx)S.x[i].addScaledVector(tmp,-(l-mx)/l)}
+    if(S.body.length){let M=0;C.set(0,0,0);C0.set(0,0,0);
+      for(const i of S.body){const mm=S.m[i]*(g&&g.i===i?10:1);M+=mm;C.addScaledVector(S.x[i],mm);C0.addScaledVector(S.X0[i],mm)}
+      C.multiplyScalar(1/M);C0.multiplyScalar(1/M);a0.set(0,0,0);a1.set(0,0,0);a2.set(0,0,0);
+      for(const i of S.body){const mm=S.m[i]*(g&&g.i===i?10:1);tmp.subVectors(S.x[i],C).multiplyScalar(mm);tmp2.subVectors(S.X0[i],C0);a0.addScaledVector(tmp,tmp2.x);a1.addScaledVector(tmp,tmp2.y);a2.addScaledVector(tmp,tmp2.z)}
+      extractRot(a0,a1,a2,S.qBody);
+      for(const i of S.body)S.x[i].subVectors(S.X0[i],C0).applyQuaternion(S.qBody).add(C)}
+    if(box)for(let i=0;i<n;i++){if(S.pinned[i])continue;const rr=S.rad[i]*sc*(S.type[i]?0.7:1);tmp.copy(S.x[i]).applyMatrix4(rootInv);
+      if(tmp.x>box.min.x-rr&&tmp.x<box.max.x+rr&&tmp.y>box.min.y-rr&&tmp.y<box.max.y+rr&&tmp.z>box.min.z-rr&&tmp.z<box.max.z+rr){
+        const d=[tmp.x-(box.min.x-rr),box.max.x+rr-tmp.x,tmp.y-(box.min.y-rr),box.max.y+rr-tmp.y,tmp.z-(box.min.z-rr),box.max.z+rr-tmp.z];let b=0;for(let j=1;j<6;j++)if(d[j]<d[b])b=j;
+        const ax='xyz'[b>>1];tmp[ax]=(b&1)?box.max[ax]+rr:box.min[ax]-rr;S.x[i].copy(tmp).applyMatrix4(window.phoneRoot.matrixWorld)}}
+    if(g&&!S.pinned[g.i])S.x[g.i].lerp(g.target,0.6);
+  }
+}
+const _Ml=new M4(),_Mi=new M4(),_N=new M3(),_T=new M3(),_o=new V3(),_n=new V3(),_p=new V3(),_s=new V3(),_a0=new V3(),_a1=new V3(),_a2=new V3();
+function updateGeo(S){
+  restWorld(S);const M=S.bg.matrixWorld;_Ml.copy(M).setPosition(0,0,0);_Mi.copy(M).invert();_N.getNormalMatrix(M);_T.setFromMatrix4(M).transpose();
+  // cord frames: swing-only rotation (rest tangent -> current tangent) so the strap never accumulates twist
+  const raw=S.raw||(S.raw=S.q.map(()=>new Q())),sm=S.sm||(S.sm=S.q.map(()=>new Q()));
+  for(let i=0;i<S.strapN;i++){const nb=S.nbr[i];raw[i].identity();if(!nb.length)continue;_a0.set(0,0,0);_a1.set(0,0,0);
+    nb.forEach((j,k)=>{const sg=S.sgn[i][k];if(!sg)return;_a0.addScaledVector(tmp2.subVectors(S.X0[j],S.X0[i]),sg);_a1.addScaledVector(tmp.subVectors(S.x[j],S.x[i]),sg)});
+    if(_a0.lengthSq()<1e-12||_a1.lengthSq()<1e-12){const j=nb[S.fb[i]];_a0.subVectors(S.X0[j],S.X0[i]);_a1.subVectors(S.x[j],S.x[i])}
+    if(_a0.lengthSq()>1e-12&&_a1.lengthSq()>1e-12)raw[i].setFromUnitVectors(_a0.normalize(),_a1.normalize())}
+  for(let pass=0;pass<3;pass++){
+    for(let i=0;i<S.strapN;i++){const o=sm[i].copy(raw[i]);let qx=o.x*2,qy=o.y*2,qz=o.z*2,qw=o.w*2;
+      for(const j of S.nbr[i]){const r=raw[j],sg=(o.x*r.x+o.y*r.y+o.z*r.z+o.w*r.w)<0?-1:1;qx+=sg*r.x;qy+=sg*r.y;qz+=sg*r.z;qw+=sg*r.w}
+      o.set(qx,qy,qz,qw).normalize()}
+    for(let i=0;i<S.strapN;i++)raw[i].copy(sm[i])}
+  for(let i=0;i<S.strapN;i++)S.q[i].copy(raw[i]);
+  for(let i=S.strapN;i<S.n;i++)S.q[i].copy(S.qBody);
+  for(let i=0;i<S.N;i++){_p.set(0,0,0);_s.set(0,0,0);
+    for(let j=0;j<3;j++){const pi=S.sIdx[3*i+j];if(pi<0)break;const w=S.sW[3*i+j],q=S.q[pi];
+      _o.set(S.sOff[9*i+3*j],S.sOff[9*i+3*j+1],S.sOff[9*i+3*j+2]).applyMatrix4(_Ml).applyQuaternion(q).add(S.x[pi]);_p.addScaledVector(_o,w);
+      _n.set(S.nor0[3*i],S.nor0[3*i+1],S.nor0[3*i+2]).applyMatrix3(_N).normalize().applyQuaternion(q);_s.addScaledVector(_n,w)}
+    _p.applyMatrix4(_Mi);_s.applyMatrix3(_T).normalize();
+    const gi=S.meshOf[i],g=S.meshes[gi].geometry,l=i-S.off[gi];
+    g.attributes.position.setXYZ(l,_p.x,_p.y,_p.z);g.attributes.normal.setXYZ(l,_s.x,_s.y,_s.z)}
+  S.meshes.forEach(m=>{m.geometry.attributes.position.needsUpdate=true;m.geometry.attributes.normal.needsUpdate=true;m.geometry.computeBoundingSphere();m.geometry.computeBoundingBox()});
+}
+function restoreGeo(S){S.meshes.forEach((m,gi)=>{const g=m.geometry,c=g.attributes.position.count;g.attributes.position.array.set(S.pos0.subarray(S.off[gi]*3,(S.off[gi]+c)*3));if(g.attributes.normal)g.attributes.normal.array.set(S.nor0.subarray(S.off[gi]*3,(S.off[gi]+c)*3));g.attributes.position.needsUpdate=true;g.attributes.normal.needsUpdate=true;g.computeBoundingSphere();g.computeBoundingBox();m.frustumCulled=true})}
+
+/* ---------- enable / disable ---------- */
+function ensurePhone(){if(!P.ph&&window.phoneRoot)P.ph={home:window.phoneRoot.position.clone(),vel:new V3(),target:new V3(),dragging:false}}
+function phoneHome(){if(P.ph){P.ph.dragging=false;P.ph.vel.set(0,0,0);window.phoneRoot.position.copy(P.ph.home);window.phoneRoot.updateMatrixWorld(true)}}
+function enable(){
+  const S=build();if(!S){hint.textContent='No charm to simulate yet.';return}
+  ensurePhone();P.sim=S;S.meshes.forEach(m=>m.frustumCulled=false);hat.g.updateMatrixWorld(true);resetPos(S);acc=0;last=performance.now()/1000;
+}
+function cleanup(restore){P.grab=null;if(P.ph)P.ph.dragging=false;if(P.sim&&restore&&hat.g)restoreGeo(P.sim);P.sim=null;phoneHome()}
+function setOn(on){P.on=on;$('physOpts').style.display=on?'flex':'none';$('physDrag').disabled=!on;if(!on){$('physDrag').checked=false;P.drag=false;cleanup(true);hint.textContent='';ren.domElement.style.cursor=''}else enable()}
+$('phys').addEventListener('change',e=>setOn(e.target.checked));
+$('physDrag').addEventListener('change',e=>{P.drag=e.target.checked;if(!P.drag){P.grab=null;if(P.ph)P.ph.dragging=false;ren.domElement.style.cursor=''}});
+$('physReset').addEventListener('click',()=>{if(!P.on)return;cleanup(true);enable()});
+window.__physOnLoad=()=>{if(P.on){cleanup(false);enable()}};
+window.__physOnRemove=()=>{if(P.sim)cleanup(false)};
+window.__physFrame=()=>{const S=P.sim;if(!P.on||!S||!hat.g)return;const now=performance.now()/1000;acc+=Math.min(0.05,now-last);last=now;
+  let c=0;while(acc>=H&&c<MAXSUB){step(S,H);acc-=H;c++}if(c===MAXSUB)acc=0;updateGeo(S)};
+
+/* ---------- dragging ---------- */
+const dom=ren.domElement,rc=new THREE.Raycaster(),ndc=new THREE.Vector2(),plane=new THREE.Plane(),hit=new V3();
+const rayAt=e=>{rc.__px=e.clientX;rc.__py=e.clientY;const b=dom.getBoundingClientRect();ndc.set((e.clientX-b.left)/b.width*2-1,-(e.clientY-b.top)/b.height*2+1);rc.setFromCamera(ndc,cam)};
+const vis=o=>{for(;o;o=o.parent)if(!o.visible)return false;return true};
+const inside=(o,a)=>{for(;o;o=o.parent)if(o===a)return true;return false};
+function nearParticle(maxPx,limitDist){const S=P.sim,b=dom.getBoundingClientRect(),v=new V3();let best=null,bd=maxPx;
+  S.x.forEach((x,i)=>{if(S.pinned[i])return;v.copy(x).project(cam);if(v.z>1)return;const px=(v.x+1)/2*b.width,py=(1-v.y)/2*b.height,d=Math.hypot(px-(rc.__px-b.left),py-(rc.__py-b.top));
+    if(d<bd&&x.distanceTo(cam.position)<limitDist){bd=d;best=i}});return best}
+function pick(){const hs=hat.g?rc.intersectObject(hat.g,true).filter(h=>vis(h.object)):[],
+  ps=window.phoneRoot?rc.intersectObject(window.phoneRoot,true).filter(h=>vis(h.object)&&!inside(h.object,hat.g)):[];
+  const a=hs[0],b=ps[0];if(a&&(!b||a.distance<=b.distance))return{kind:'charm',point:a.point};
+  // the cord is thin: also accept clicks that land close to a cloth particle (when the phone isn't in front of it)
+  const pi=nearParticle(26,b?b.distance+0.06:1e9);if(pi!=null)return{kind:'charm',point:P.sim.x[pi].clone(),pi};
+  if(b)return{kind:'phone',point:b.point};return null}
+function ready(){return P.on&&P.drag&&P.sim&&hat.g&&hat.g.visible}
+$('view').addEventListener('pointerdown',e=>{
+  if(!ready()||e.button!==0||P.grab||(P.ph&&P.ph.dragging))return;rayAt(e);const p=pick();if(!p)return;
+  e.stopPropagation();e.preventDefault();cam.getWorldDirection(tmp);plane.setFromNormalAndCoplanarPoint(tmp,p.point);
+  if(p.kind==='charm'){let bi=p.pi,bd=1e30;if(bi==null)P.sim.x.forEach((x,i)=>{if(P.sim.pinned[i])return;const d=x.distanceToSquared(p.point);if(d<bd){bd=d;bi=i}});
+    P.grab={i:bi,off:P.sim.x[bi].clone().sub(p.point),target:P.sim.x[bi].clone(),id:e.pointerId}}
+  else{ensurePhone();const ph=P.ph;ph.dragging=true;ph.start=p.point.clone();ph.base=window.phoneRoot.position.clone();ph.target.copy(ph.base);ph.id=e.pointerId}
+  dom.style.cursor='grabbing';
+},true);
+addEventListener('pointermove',e=>{
+  if(P.grab&&e.pointerId===P.grab.id){rayAt(e);if(rc.ray.intersectPlane(plane,hit))P.grab.target.copy(hit).add(P.grab.off);return}
+  const ph=P.ph;if(ph&&ph.dragging&&e.pointerId===ph.id){rayAt(e);if(rc.ray.intersectPlane(plane,hit))ph.target.copy(ph.base).add(hit).sub(ph.start);return}
+  if(ready()&&e.target===dom){rayAt(e);dom.style.cursor=pick()?'grab':''}});
+const release=e=>{if(P.grab&&e.pointerId===P.grab.id)P.grab=null;if(P.ph&&P.ph.dragging&&e.pointerId===P.ph.id)P.ph.dragging=false;if(!P.grab&&!(P.ph&&P.ph.dragging))dom.style.cursor=''};
+addEventListener('pointerup',release);addEventListener('pointercancel',release);
+})();
+
 </script></body></html>
