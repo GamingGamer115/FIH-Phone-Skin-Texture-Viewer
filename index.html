@@ -294,7 +294,10 @@ new THREE.GLTFLoader().parse(bin.buffer,'',g=>{
   mats.forEach(m=>{orig.push(m.map);origEmission.push(m.emissiveMap||null);m.userData.__originalEmissiveColor=m.emissive.clone();m.userData.__originalEmissiveIntensity=m.emissiveIntensity;});
   scene.add(root);window.phoneRoot=root;
   const box=new THREE.Box3().setFromObject(root),s=box.getSize(new THREE.Vector3()),c=box.getCenter(new THREE.Vector3());
-  window.phoneBox=box.clone();root.position.sub(c);modelSize=Math.max(s.x,s.y,s.z)||1;const d=modelSize*2.6;
+  window.phoneBox=box.clone();
+  {root.updateMatrixWorld(true);const bb=new THREE.Box3(),vis=q=>{for(;q;q=q.parent)if(!q.visible)return false;return true};
+   root.traverse(m=>{if(m.isMesh&&vis(m)&&!/Outline/i.test(m.material&&m.material.name||''))bb.expandByObject(m)});window.phoneBody=bb.isEmpty()?box.clone():bb}
+  root.position.sub(c);modelSize=Math.max(s.x,s.y,s.z)||1;const d=modelSize*2.6;
   ctl.target.set(0,0,0);cam.position.set(d*.4,d*.2,d);ctl.update();defaultCamera={position:cam.position.clone(),target:ctl.target.clone()};$('msg').remove();resize();
 },e=>{$('msg').textContent='Failed to load model'});
 let tgt=0;
@@ -402,6 +405,10 @@ function buildHat(parts){
   return{g,len,ax,q};
 }
 
+// Lanyard attachment point on the phone's top end face (the two oval slots), in the phone's own coordinates.
+// x/y are measured from the slots' centre; z is the end face of the phone body. Edit LANYARD to move the default spot.
+const LANYARD={x:0,y:-0.037,inset:0.05};
+function attachPoint(){const b=window.phoneBody||window.phoneBox;return new THREE.Vector3(LANYARD.x,LANYARD.y,b.max.z-LANYARD.inset)}
 function placeHat(){
   if(!hat.g||!window.phoneBox)return;const pb=window.phoneBox,sc=Math.max(1e-4,Number($('hs').value)||1),ov=0.03,D=Math.PI/180;
   ['rx','ry','rz'].forEach(i=>$(i+'v').textContent=$(i).value+'°');
@@ -411,7 +418,7 @@ function placeHat(){
   // pivot/attachment end flips with it instead of the offset staying world-aligned.
   const flipOffset=flip?(hat.g.userData.charmLength||0)*sc:0;
   const rotatedFlipOffset=new THREE.Vector3(0,0,flipOffset).applyEuler(hat.g.rotation);
-  hat.g.position.set(0,(pb.min.y+pb.max.y)/2,pb.max.z-ov)
+  hat.g.position.copy(attachPoint())
     .add(rotatedFlipOffset)
     .add(new THREE.Vector3(Number($('hx').value),Number($('hy').value),Number($('hz').value)));
 }
@@ -532,7 +539,7 @@ function build(){
 const tmp=new V3(),tmp2=new V3(),rootInv=new M4();
 function restWorld(S){S.bg.updateMatrixWorld(true);const M=S.bg.matrixWorld;for(let i=0;i<S.n;i++)S.X0[i].copy(S.r[i]).applyMatrix4(M)}
 function configure(S){
-  restWorld(S);const pb=window.phoneBox,A=new V3(Number($('hx').value),(pb.min.y+pb.max.y)/2+Number($('hy').value),pb.max.z-0.03+Number($('hz').value)).applyMatrix4(window.phoneRoot.matrixWorld);
+  restWorld(S);const pb=window.phoneBox,A=attachPoint().add(new V3(Number($('hx').value),Number($('hy').value),Number($('hz').value))).applyMatrix4(window.phoneRoot.matrixWorld);
   let near=0,nd=1e30;for(let i=0;i<S.n;i++){const d=S.X0[i].distanceToSquared(A);if(d<nd){nd=d;near=i}}
   S.pinned.fill(0);
   if(S.type[near]===1&&S.body.length)S.body.forEach(i=>S.pinned[i]=1);            // heavy end sits at the phone: the whole rigid end is anchored
@@ -563,7 +570,7 @@ function step(S,h){
   for(let k=0;k<S.bends.length;k++)S.bL[k]=S.X0[S.bends[k][0]].distanceTo(S.X0[S.bends[k][1]]);
   for(let k=0;k<S.links.length;k++)S.lL[k]=S.X0[S.links[k][0]].distanceTo(S.X0[S.links[k][1]]);
   const w=i=>S.pinned[i]?0:1/S.m[i],wB=1/S.Mb;rootInv.copy(window.phoneRoot.matrixWorld).invert();
-  const box=window.phoneBox,g=P.grab,C=new V3(),C0=new V3(),a0=new V3(),a1=new V3(),a2=new V3();
+  const box=window.phoneBody||window.phoneBox,g=P.grab,C=new V3(),C0=new V3(),a0=new V3(),a1=new V3(),a2=new V3();
   for(let it=0;it<ITER;it++){
     for(let k=0;k<S.edges.length;k++){const e=S.edges[k];dist(S,e[0],e[1],S.eL[k],w(e[0]),w(e[1]))}
     for(let k=0;k<S.bends.length;k++){const e=S.bends[k];dist(S,e[0],e[1],S.bL[k],w(e[0]),w(e[1]),0.35)}
