@@ -627,7 +627,7 @@ function cleanup(restore){P.grab=null;if(P.ph)P.ph.dragging=false;if(P.sim&&rest
 function setOn(on){P.on=on;$('physOpts').style.display=on?'flex':'none';$('physDrag').disabled=!on;if(!on){$('physDrag').checked=false;P.drag=false;cleanup(true);hint.textContent='';ren.domElement.style.cursor=''}else enable()}
 $('phys').addEventListener('change',e=>setOn(e.target.checked));
 $('physDrag').addEventListener('change',e=>{P.drag=e.target.checked;if(!P.drag){P.grab=null;if(P.ph)P.ph.dragging=false;ren.domElement.style.cursor=''}});
-$('physReset').addEventListener('click',()=>{if(!P.on)return;cleanup(true);enable()});
+$('physReset').addEventListener('click',()=>{gIn.value='40';dIn.value='20';if(!P.on)return;cleanup(true);enable()});
 window.__physOnLoad=()=>{if(P.on){cleanup(false);enable()}};
 window.__physOnRemove=()=>{if(P.sim)cleanup(false)};
 window.__physFrame=()=>{const S=P.sim;if(!P.on||!S||!hat.g)return;const now=performance.now()/1000;acc+=Math.min(0.05,now-last);last=now;
